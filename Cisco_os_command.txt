@@ -1,0 +1,417 @@
+<CONFIGURING USERNAME PASS CISCO ROUTER >
+
+R2# config t
+R2(config)# line vty 0 4
+R2(config-line)# password 'pass'
+R2(config-line)# login
+R2(config)#
+
+Configure hostname table
+r2(config)# ip host 'hostname' 'ip'
+  es:       ip host r2-serial 172.10.10.1
+
+r2# sh hosts
+
+Troubleshoot interfaces
+SW1#show ip interface brief
+SW1# sh int status
+R1#  sh int 'int'
+    "check interfaces is not shutdown"
+
+R1#show ip interface brief
+
+
+--------------------------------------------------------------------------------------------------------------------------------
+ENABLE SECRET PASSWORD,(when user tries to enter privileged mode)
+SW(config)#enable secret 'pass'
+SW>en
+Password:cs
+_______________________________________________________________________________________________________________________________
+
+<CONFIGUR PORT SECURITY>
+
+SW# config t
+SW(config-if)# int 'int'
+SW(config-if)# switchport mode access
+               switchport port-security #enable port security
+               switchport port-security mac-address 'mac_address' # allow to connect this device
+               switchport port-security mac-address stycky  #learn dinamically the mac_address
+<optional>     switchport port-security violation restrict #increment securityviolation counter, send SNMP notification
+<optional>     switchport port-security violation shutdown #default, port is err-disbaled, manual recovery no SNMP notification
+<optional>     switchport port-security maximum 'number 0-8192' # allow maximum device to connect
+
+SW> sh port-security or sh port-security int 'int'  # show the number of discarded frames
+
+______________________________________________________________________________________________________________________________
+
+
+CONFIGURE EIGRP IPV4, classful network,
+R2# config t
+R2(config)#router eigrp 'id ASN'   #this number must match the configured ASN configured on Router neighbor
+  ES      #router eigrp 1
+R2(config-router)#network 'Class network ID A,B,C'
+  ES             #network 192.168.1.0   # this will configure EIGRP for network class C 192.168.1.0, and Eigrp will find the neighbor
+  ES             #no auto-summary       # IF we have discontiguous network
+
+< Configuring EIGRP IPv4 classless networkID & WildcardMask >
+R2# config t
+R2(config)#router eigrp 1
+          #network NetworkID WildcardMask es 172.16.0.10 /25
+  ES      #network 172.16.0.10 0.0.0.127    (255-128 = 127)
+
+R2#show ip router
+R2#show ip eigrp interfaces
+R2#show ip eigrp interface detail 'int'
+R2#show ip eigrp traffic
+R2#show ip eigrp neighbors
+R2#show ip eigrp topology
+
+CHANGE HELLO TIMER Eigrp
+R1# config t
+R1(config)#router eigrp ASN
+R1(config)#interface 'int' # shutdown the interface before
+R1(config-if)#shutdown
+R1(config-if)#ip hello-interval eigrp 'asn' 'second'  #select eigrp ans with seconds
+R1(config-if)#interface 'int' #re-enable the interface
+R1(config-if)#no shutdown
+-------------------------------------------------------------------------------------------------------------------------------
+EIGRP IPv6
+R1# config t
+R1(config)#ipv6 unicast-routing  #to start useing ipv6 on ROUTER
+R1(config-rtr)#ipv6 router eigrp 'ASN'
+R1(config-rtr)#no shutdown       # start to run Eigrp
+R1(config-rtr)#eigrp router-id   ##'id-number_ipv4', no autotab
+R1(config-rtr)#int 'int'         # seletct int to eigrp on interface, no autotab
+R1(config-if)#ipv6 eigrp 'ASN'   # same ASN we select before
+# if we have another interface
+R1(config-if)#int 'int'
+R1(config-if)#ipv6 eigrp 'ASN'  # same asn we select before
+
+--------------------------------------------------------------------------------------------------------------------------------
+
+<CONFIGURING OSPFv2 ipv4 Single Area 0> classless config
+R2#config t
+R2(config)#router ospf 'process ID' from 1-65535 * can be different in the same Area
+  ES      #router ospf 1
+R2(config)#router-id 'IPv4 format'   #if we want configure Router priority
+R2(config-router)#network 'Network id' 'WildcardMask' area 'area ID' from 0-4294967295 * area id must be the same
+ES 10.0.0.0/24   #network 10.0.0.0 0.255.255.255 area 0 # or WildcardMask 0.0.0.0
+R2(config-router)#network 192.168.10.64 0.0.0.15 area 0
+                 #network 192.168.10.80 0.0.0.15 area 0
+                 #network 192.168.10.8 0.0.0.3 area 0
+
+<Configuring ospf passive-interfaces>
+
+R2(confuig)#router ospf 'process ID' #process id that we choose
+ES          #router ospf 1
+R2(config)#passive-interface 'int'
+  ES      #passive-interface fa0/1
+
+<Advertise Default Route ospf to the other routers>
+
+R2#config t
+R2(config)# ip route 0.0.0.0 0.0.0.0 'netx-hop ip adrr' OR 'int'
+R2(config)#router ospf 'process ID'
+ ES       #router ospf 1
+R2(config-router)#default-information originate
+_________________________________________________________________________________________________________________________________
+
+<CONFIGURING OSPFv2 Single Area 0 ipv4 WildcardMask 0.0.0.0> # classful config
+R2#config t
+R2(config)#router ospf 'process ID' from 1-65535
+  ES      #router ospf 1
+R2(config-router)#network 'Network id' 'WildcardMask' area 'area ID' from 0-4294967295
+ES 10.0.0.0/24   #network 10.0.0.0 0.0.0.0 area 0
+R2(config-router)#network 192.168.10.64 0.0.0.0 area 0
+                 #network 192.168.10.80 0.0.0.0 area 0
+________________________________________________________________________________________________________________________________
+
+<CONFIGURING OSPFv2 ipv4 Multi-Area>
+in multi ospf area, musb be an Area 0 (backbone)
+R1#config t
+R1(config)#router ospf 'process ID' from 1-65535 * can be different in the same area
+R1(config-router)#router-id 1.1.1.1 # router priority
+R1(config-router)#network 'Network ID' 'WildcardMask' area 'area -id'
+ES: Area 0         #network 10.10.0.0 0.0.255.255 area 0
+ES: Area 1         #network 172.16.10.0 0.0.0.3 area 1
+ES: Area 2         #network 172.16.10.4 0.0.0.3 area 2
+
+# Area 1
+R2#config t
+R2(config)#router ospf 1 #process ID
+R2(config-router)#network 'NetworkID' 'WildcardMask'
+Es: Area 1       #network 172.16.10.0 0.0.0.3 area 1
+Es: Area 1       #network 10.10.0.0 0.0.255.255 area 1
+
+
+Area 2
+R3#config t
+R3(config)#router ospf 1 #process id
+R3(config-router)#network 172.16.10.4 0.0.0.3 area 2
+R3(config-router)#network 10.10.0.0 0.0.255.255 area 2
+
+________________________________________________________________________________________________________________________________
+
+<OSPFv2 verification command>
+
+R2# sh ip ospf neighbor  # to see ospf enable interfaces
+                           adjacency state, DR/BDR
+
+R2# sh ip ospf          # to see router role ABR, ASBR, BR, ROUTER-ID
+                        # area information,
+
+R2# sh ip ospf interface 'int'   #show infos about IP-address.
+                                 # Area assignment, process-id, Router-id
+                                 #Network type point-to-point, Broadcast ecc
+                                 #state, DR & BDR election, Cost, hello & dead interval,
+
+R2# sh ip protocols              #show infos about running routing protocol
+                                 #rip,ospf,eigrp,bgp,is-is
+
+R2# sh ip route ospf             #sh ospf route
+
+R2# sh ip ospf database          #infos about number if routers in the internetwork (AS)
+                                 #ROUTER-ID,
+________________________________________________________________________________________________________________________________
+
+< CONFIGURING OSPFv3 Single Area>
+
+R1(config)#ipv6 unicast-routing                     #must be used to enable ipv on router
+R1(config)#ipv6 router ospf 'ospf process-id'
+%OSPFv3-4-NORTRID: OSPFv3 process 10 could not pick a router-id,please configure manually
+R1(config-rtr)#router-id 1.1.1.1                    #mondatory in ipv6 to configure RID
+R1(config-rtr)#auto-cost reference-bandwidth 10000  #optional, to configure the Cost
+R1(config-rtr)#interface f0/0                   #select interface
+R1(config-if)#ipv6 ospf 10 area 1               #run ospf 'ospf process-id' on area 'area-id'
+
+
+
+_________________________________________________________________________________________________________________________________
+
+< CONFIGURING OSPFv3 Multi-area >
+
+R1(config)#ipv6 unicast-routing
+R1(config)#ipv6 router ospf 10
+R1(config-rtr)#router-id 1.1.1.1
+R1(config-rtr)#interface f0/0
+R1(config-if)#ipv6 ospf 10 area 1
+R1(config-rtr)#interface s0/0/0
+R1(config-if)#ipv6 ospf 10 area 0
+
+R2#config t
+R2(config)#ipv6 unicast-routing
+R2(config)#ipv6 router ospf 10
+R2(config-rtr)#router-id 2.2.2.2
+R2(config-rtr)#int g0/0
+R2(config-if)#ipv6 ospf 1 area 1
+gi0/1        #int gi0/1
+             #ipv6 ospf 1 area 1
+s0/0/0       #int s0/0/0
+             #ipv6 ospf 1 area 0
+
+___________________________________________________________________________________________________________________________________
+
+<OSPFv3 verification command>
+
+R2# sh ipv6 route ospf   # show routes on routers
+                         # O is intra-area, OI is inter-Area
+
+R2# sh ipv6 protocols   # show which interfaces are part of ospf proces
+                        # & and in which Area
+
+R2# sh ip int brief     # show active interface IPV4 & IPv6
+
+R2#  sh ipv6 protocols #sh ip routing procol enabled on routers
+
+R2# sh ipv6 ospf int 'int' #sh DR/BDR, router-id, network type
+
+R2# sh ipv6 ospf neighbor  #RID adjacency state,
+
+R2# sh ipv6 ospf    #roouter role ospf process-id, bandwidth
+
+__________________________________________________________________________________________________________________________________
+
+<Configuring AAA Radius> udp
+
+Router#config t
+
+Router(config)#aaa new-model                    #enable AAA services in order to configure all AAA commands
+
+Router(config)#username 'user' password 'pass'  # cretate local user with Password
+
+Router(config)#radius server SecureLogin
+
+Router(config-radius-server)# address ipv4 'Server-RADIUS-IPV4'
+
+Router(config-radius-server)#key 'name of radius key'   # the RADIUS key that is configured on the server
+
+Router(config)#aaa group server radius MyRadiusGroup
+
+Router(config-sg-radius)#server name SecureLogin
+
+Router(config)#aaa authentication login default group MyRadiusGroup local
+___________________________________________________________________________________________________________________________________
+
+<Configure AAA TACACS+>  tcp
+
+Router#config t
+
+Router(config)# aaa new-model   #enable AAA in global configuration
+
+Router(config)#username 'user' password 'pass'    # create local user & pass
+
+Router(config)#radius server SecureLoginTACACS+
+
+Router(config-radius-server)#address ipv4 10.10.10.254
+
+Router(config-radius-server)#key MyTACACS+Password
+
+Router(config)#aaa group server radius MyTACACS+Group
+
+Router(config-sg-radius)#server name SecureLoginTACACS+
+
+Router(config)# aaa authentication login default group MyTACACS+Group local
+__________________________________________________________________________________________________________________________________
+
+---------------------------------------------------------------------------------------------------------------------------------
+< CONFIGURE DHCPv4 server on Router or Layer 3 switchport
+
+R1(config)#ip dhcp excluded-address 192.168.0.1 192.168.0.50  #exclude start ip & end ip
+R1(config)#ip dhcp pool Floor1DHCP                            # pool name
+R1(dhcp-config)#network 192.168.0.0 255.255.255.0             # networkID & SubnetMask
+R1(dhcp-config)#default-router 192.168.0.1                    # GW
+R1(dhcp-config)#dns-server 192.168.0.1                        # dns server
+
+< display DHCPv4 infos >
+
+R1#show ip dhcp binding            # To view information about the currently leased addresses
+IP address Client-ID/ Lease expiration Type
+             Hardware address
+192.168.0.51 0060.5C2B.3DCC -- Automatic
+
+< display DHCP pool>
+R1#show ip dhcp pool
+
+<CONFIGURE DHCP Relay Agent>
+R1#config t
+R1(config)#ip helper-address 'DHCP-server-ip'  # enable dhcp forwarding proccess
+
+________________________________________________________________________________________________________________________________
+
+
+<Confguring DHCP Snooping on Switch>
+
+SW#config t
+SW(config)#ip dhcp snoopong                         #enable dhcp snooping on global configuration
+SW(config)#ip dhcp snooping vlan 'vlanID'           #select vlanID
+SW(config)interfaces 'int'                          #select interface as trust
+SW(config-if)#ip dhcp snooping trust                #select the int as trust, by default all ports are untrusted
+
+<Display DHCP snooping info>
+
+SW#show ip dhcp snooping    #show dhcp snooping status
+SW#show ip dhcp binding     #
+_______________________________________________________________________________________________________________________________
+
+
+<Configuring DAI on Switch>
+
+SW#config t
+SW(config)#ip arp inspection vlan 'vlanID'  #enable DAI on vlan selected
+SW(config)#interface fa0/0                  #select the interface as trust
+SW(config-if)#ip arp inspection trus
+
+<display DAI infos>
+
+SW#show ip arp inspection
+SW#show ip arp inspection statistics
+
+___________________________________________________________________________________________________________________________
+
+<CONFIGURING HSRP>
+
+(Active router)
+HSRP1#config t
+HSRP1(config)#int 'interface'
+HSRP1(config-if)#standby 'group-number' ip 'virtual-ip'  # to set group-number-ID & virtual-ip
+    ES          #standby 1 ip 10.10.10.1
+HSRP1(config-if)#standby 1 name 'name'      # optional
+HSRP1(config-if)#standby 1 priority 'id from 0-255'  # to set priority, highest priority mean Active-router, default is 100
+   ES           #standby 1 priority 110
+
+
+HSRP2#config t
+HSRP2(config)#int 'same interface on HARP1 router'
+HSRP2(config-ig)#standby 'same ID group on HSRP1 router' ip 'virtual ip, same on HSRP1 router'
+ ES             #standby 1 ip 10.10.10.1
+HSRP2(config-if)# standby 1 name 'name'  #same name on -HSRP1 router
+
+
+-- TO SEE INFO about HSRP
+
+HSRP1#show standby
+
+# to see group id, virtual ip & mac_address, hello TIMER
+  whois the active router& standby routers
+
+HSRP1# show standby brief
+
+FastEthernet0/0 - Group 1
+State is Active
+2 state changes, last state change 00:03:40
+Virtual IP address is 10.1.1.10
+Active virtual MAC address is 0000.0c07.ac01
+Local virtual MAC address is 0000.0c07.ac01 (v1 default)
+Hello time 3 sec, hold time 10 sec
+Next hello sent in 1.076 secs
+Preemption disabled
+Active router is local
+Standby router is 10.1.1.2, priority 100 (expires in 7.448 sec)
+Priority 110 (configured 110
+
+# to execute debug
+HSRP2#debug standby
+
+________________________________________________________________________________________________________________________
+
+<CONFIGURING SPAN ON SWITCH/ROUTER>
+
+SW#config t
+SW(config)#monitor session 'id' source interface 'int'        # Asssociate a SPAN sessione number 1-66,
+  ES      #monitor session  1   source interface fa0/0        #  with source port
+
+SW(config)#monitor session 'id' destination interface 'int'   #Associate same SPAN session number,
+          #monitor session  1   destination interface fa0/1   #with the destination port connected to an analyzer
+
+SW(config)#do sh monitor          # to see SPAN infos
+_______________________________________________________________________________________________________________________
+
+<IPV6 address Manual Assignment>
+R1#config t
+R1(config)#ipv6 unicast-routing   #to enable IPV6 on router, by default is disabled
+R1(config)#int s0/0/0
+R1(config-if)#ipv6 address 'ipv6prefix'/prefix-lenght
+R1(config-ig)#ipv6 2001:db8:3456:1:260:d6ff:fe56:1987/64
+R1(config-if)#ipv6 address 'ipv6prefix/prefix-lenght' eui-64  #to use mode eui-64
+             #sh ipv6 int brief     #to see interface with only ipv6 configured
+<IPv6 static Route>
+
+R1#config t
+R1(config)#ipv6 unicast routing  #enable IPV6
+R1(config)#int s0/0/0
+R1(config-if)#ipv6 route 'ipv6prefix/ipv6prefix-lenght' 'ipv6-next-hop' 'metric'
+ES           #ipv6 route  2001:db8:34cd:14::/64 2001:db8:34cd:12:21a:2fff:fee7:4398 150
+             #show ipv route  # to see al routes static, dynamic,all
+             #sh ipv6 route static # to see only static routes
+
+---------------------------------------------------------------------------------------------------------------------------
+<WAN ENCAPSULATION>
+
+<HDLC>  # of course only serial link this ENCAPSULATION workd
+R1#config t
+R1(config)#int s0/0/0
+R1(config-if)#ip address 'ip-router .1' 'SubnetMask'
+R1(config-if)#no shutdown  # by defautl interfaces on Router are disabled
+R1#show int s0/0/0
+
+<PPP>
