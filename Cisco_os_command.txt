@@ -33,14 +33,16 @@ ________________________________________________________________________________
 SW# config t
 SW(config-if)# int 'int'
 SW(config-if)# switchport mode access
-               switchport port-security #enable port security
+               switchport port-security                           #enable port security
                switchport port-security mac-address 'mac_address' # allow to connect this device
-               switchport port-security mac-address stycky  #learn dinamically the mac_address
-<optional>     switchport port-security violation restrict #increment securityviolation counter, send SNMP notification
-<optional>     switchport port-security violation shutdown #default, port is err-disbaled, manual recovery no SNMP notification
-<optional>     switchport port-security maximum 'number 0-8192' # allow maximum device to connect
+               switchport port-security mac-address stycky        #learn dinamically the mac_address
+<optional>     switchport port-security violation restrict        #increment violation counter, send SNMP notification
 
-SW> sh port-security or sh port-security int 'int'  # show the number of discarded frames
+<optional>     switchport port-security violation shutdown       #default, port is err-disbaled, manual recovery no SNMP notification
+
+<optional>     switchport port-security maximum 'number 0-8192'     # allow maximum device to connect
+
+SW> sh port-security or sh port-security int 'int'                  # show the number of discarded frames
 
 __________________________________________________________________________________________________________________________
 < ROUTING PROTOCOLS >
@@ -421,6 +423,22 @@ R1(config-if)#sh int s0/0/0        # to see info abouthe interface s0/0/0
 <PPP Authentication, PAP or CHAP> (optional step)
 # when you have configured PPP on an interface between two Routers, then, you can configure Authentication PAP or CHAP between two routers.But first you must set a hostname to each router; with 'hostname command', after that you set Username and Password for the remote router(Server), that will be connecting to your router
 
-EX: R1 is the client, that will be connect to R2(Server) 
+EX: R1 is the client, that will be connect to R2 the Server 
 R1#config t
-R1(config)#
+R1(config)#username R2 password cisco         # set username as the hostname of Router Server, password must be the same                       
+                                              # on all router
+                                              
+R1(config)#int s0/0/0                         # select the interface where the PPP is enabled
+R1(config-if)ppp authentication pap or chap   # set the method PAP or CHAP, 
+                                              # if you set both methods, only the first method will be used, the second
+                                              # acts as a backup just in case the first method fails
+Configuration on R2 router (Server)
+R2#config t
+R2(config)#int s0/0/0          # select the interface where is connected the Router-Client (R1)
+R2(config-if)encapsulation ppp
+R2(config-if)end
+R2(config)#username R1 password cisco  #set username as the hostname of Router Client(R1)
+
+## username is the hostname of the remote router(R2), password is the password of both router that must be the same on R1 & R2. In PAP Authentication the password is send in clear-text.
+
+
