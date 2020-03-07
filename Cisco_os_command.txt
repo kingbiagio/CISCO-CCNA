@@ -290,7 +290,7 @@ R1#show ip dhcp pool
 R1#config t
 R1(config)#ip helper-address 'DHCP-server-ip'  # enable dhcp forwarding proccess
 
-_____________________________________________________________________________________________________________________________
+__________________________________________________________________________________________________________________________
 
 <Confguring DHCP Snooping on Switch>
 
@@ -414,7 +414,7 @@ R1(config-if)#no shutdown  # by defautl interfaces on Router are disabled
 R1#show int s0/0/0  # to see info about the encapsulation enbled
 
 
-< PPP Point-to-Point >
+< PPP Point-to-Point Protocol >
 
 R1#config t
 R1(config)#int s0/0/0              # select an interface to enable PPP 
