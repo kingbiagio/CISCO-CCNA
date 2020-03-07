@@ -124,7 +124,7 @@ R2(config)# ip route 0.0.0.0 0.0.0.0 'netx-hop ip adrr' OR 'int'
 R2(config)#router ospf 'process ID'
  ES       #router ospf 1
 R2(config-router)#default-information originate
-_____________________________________________________________________________________________________________________________
+__________________________________________________________________________________________________________________________
 
 <CONFIGURING OSPFv2 Single Area 0 ipv4 WildcardMask 0.0.0.0> # classful config
 R2#config t
@@ -134,7 +134,7 @@ R2(config-router)#network 'Network id' 'WildcardMask' area 'area ID' from 0-4294
 ES 10.0.0.0/24   #network 10.0.0.0 0.0.0.0 area 0
 R2(config-router)#network 192.168.10.64 0.0.0.0 area 0
                  #network 192.168.10.80 0.0.0.0 area 0
-_____________________________________________________________________________________________________________________________
+__________________________________________________________________________________________________________________________
 
 <CONFIGURING OSPFv2 ipv4 Multi-Area>
 in multi ospf area, musb be an Area 0 (backbone)
@@ -160,7 +160,7 @@ R3(config)#router ospf 1 #process id
 R3(config-router)#network 172.16.10.4 0.0.0.3 area 2
 R3(config-router)#network 10.10.0.0 0.0.255.255 area 2
 
-_____________________________________________________________________________________________________________________________
+__________________________________________________________________________________________________________________________
 
 <OSPFv2 verification command>
 
@@ -182,7 +182,7 @@ R2# sh ip route ospf             #sh ospf route
 
 R2# sh ip ospf database          #infos about number if routers in the internetwork (AS)
                                  #ROUTER-ID,
-_____________________________________________________________________________________________________________________________
+__________________________________________________________________________________________________________________________
 
 < CONFIGURING OSPFv3 Single Area>
 
@@ -196,7 +196,7 @@ R1(config-if)#ipv6 ospf 10 area 1               #run ospf 'ospf process-id' on a
 
 
 
-_____________________________________________________________________________________________________________________________
+__________________________________________________________________________________________________________________________
 
 < CONFIGURING OSPFv3 Multi-area >
 
@@ -219,7 +219,7 @@ gi0/1        #int gi0/1
 s0/0/0       #int s0/0/0
              #ipv6 ospf 1 area 0
 
-_____________________________________________________________________________________________________________________________
+__________________________________________________________________________________________________________________________
 
 <OSPFv3 verification command>
 
@@ -239,7 +239,7 @@ R2# sh ipv6 ospf neighbor  #RID adjacency state,
 
 R2# sh ipv6 ospf    #roouter role ospf process-id, bandwidth
 
-_____________________________________________________________________________________________________________________________
+__________________________________________________________________________________________________________________________
 
 <Configuring AAA Radius> udp
 
@@ -252,7 +252,7 @@ Router(config-radius-server)#key 'name of radius key'   # the RADIUS key that is
 Router(config)#aaa group server radius MyRadiusGroup
 Router(config-sg-radius)#server name SecureLogin
 Router(config)#aaa authentication login default group MyRadiusGroup local
-_____________________________________________________________________________________________________________________________
+__________________________________________________________________________________________________________________________
 
 <Configure AAA TACACS+>  tcp
 
@@ -266,7 +266,7 @@ Router(config)#aaa group server radius MyTACACS+Group
 Router(config-sg-radius)#server name SecureLoginTACACS+
 Router(config)# aaa authentication login default group MyTACACS+Group local
 
------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------
 < CONFIGURE DHCPv4-Server on Router or Layer 3 Switch >
 -----------------------------------------------------------
 
@@ -304,7 +304,7 @@ SW(config-if)#ip dhcp snooping trust                #select the int as trust, by
 
 SW#show ip dhcp snooping    #show dhcp snooping status
 SW#show ip dhcp binding     #
-_____________________________________________________________________________________________________________________________
+__________________________________________________________________________________________________________________________
 
 <Configuring DAI on Switch>
 
@@ -318,7 +318,7 @@ SW(config-if)#ip arp inspection trus
 SW#show ip arp inspection
 SW#show ip arp inspection statistics
 
-___________________________________________________________________________________________________________________________
+__________________________________________________________________________________________________________________________
 
 <CONFIGURING HSRP>
 --------------------------
@@ -399,9 +399,10 @@ R1(config-if)#ipv6 route 'ipv6prefix/ipv6prefix-lenght' 'ipv6-next-hop' 'metric'
 ES           #ipv6 route  2001:db8:34cd:14::/64 2001:db8:34cd:12:21a:2fff:fee7:4398 150
 R1(config-if)#show ip route          # to see all routes: static, dynamic, all
 R1(config-if)#show ipv6 route static # to see only static routes
+__________________________________________________________________________________________________________________________
 
----------------------------------------------------------------------------------------------------------------------------
 <WAN ENCAPSULATION>
+-------------------------------
 
 <HDLC>  
 # only on serial link this ENCAPSULATION protocol works
@@ -412,7 +413,8 @@ R1(config-if)#ip address 'ip-router .1' 'SubnetMask'
 R1(config-if)#no shutdown  # by defautl interfaces on Router are disabled
 R1#show int s0/0/0  # to see info about the encapsulation enbled
 
-<PPP>
+
+< PPP Point-to-Point >
 
 R1#config t
 R1(config)#int s0/0/0              # select an interface to enable PPP 
@@ -421,6 +423,7 @@ R1(config-if)#sh int s0/0/0        # to see info abouthe interface s0/0/0
 
 
 <PPP Authentication, PAP or CHAP> (optional step)
+
 # when you have configured PPP on an interface between two Routers, then, you can configure Authentication PAP or CHAP between two routers.But first you must set a hostname to each router; with 'hostname command', after that you set Username and Password for the remote router(Server), that will be connecting to your router
 
 EX: R1 is the client, that will be connect to R2 the Server 
@@ -432,13 +435,16 @@ R1(config)#int s0/0/0                         # select the interface where the P
 R1(config-if)ppp authentication pap or chap   # set the method PAP or CHAP, 
                                               # if you set both methods, only the first method will be used, the second
                                               # acts as a backup just in case the first method fails
+
 Configuration on R2 router (Server)
 R2#config t
-R2(config)#int s0/0/0          # select the interface where is connected the Router-Client (R1)
+R2(config)#int s0/0/0                         # select the interface where is connected the Router-Client (R1)
 R2(config-if)encapsulation ppp
 R2(config-if)end
-R2(config)#username R1 password cisco  #set username as the hostname of Router Client(R1)
+R2(config)#username R1 password cisco         # set username as the hostname of Router Client(R1), password must be the                         
+                                              # same on all router
+                                              # In PAP Authentication the password is send in clear-text.
 
-## username is the hostname of the remote router(R2), password is the password of both router that must be the same on R1 & R2. In PAP Authentication the password is send in clear-text.
-
-
+R2#debug ppp authentication                   # to see if the authentication between two routers is good, if not you     
+                                              # receive an ERROR message "MD/DES compare failed" 
+__________________________________________________________________________________________________________________________
