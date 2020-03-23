@@ -1,34 +1,116 @@
-<CONFIGURING USERNAME PASS CISCO ROUTER >
+Cisco IOS Command 
+--------------------------------------------------------------------------------------------------------------------
+< Basic Configuration>
+-------------------------------------
 
-R2# config t
-R2(config)# line vty 0 4
-R2(config-line)# password 'pass'
-R2(config-line)# login
-R2(config)#
+SW1# show version   #Shows infos about the switch and its interfaces, RAM, NVRAM, flash, IOS, etc.
 
-Configure hostname table
-r2(config)# ip host 'hostname' 'ip'
-  es:       ip host r2-serial 172.10.10.1
+SW1# show running-config  #Shows the current configuration file stored in DRAM.
 
-r2# sh hosts
+SW1# show startup-config #Shows the configuration file stored in NVRAM which is used at first boot process.
 
-Troubleshoot interfaces
-SW1#show ip interface brief
-SW1# sh int status
-R1#  sh int 'int'
-    "check interfaces is not shutdown"
+SW1# show history       #Lists the commands currently held in the history cli.
 
-R1#show ip interface brief
+SW1# show ip interface brief  #Shows an overview of all interfaces, status, protocol status and ip address assigned.
 
+SW1# show interface vlan 1  #Shows detailed information about the specified interface, its status, protocol, duplex, speed, encapsulation
 
---------------------------------------------------------------------------------------------------------------------------
-ENABLE SECRET PASSWORD,(when user tries to enter privileged mode)
-SW(config)#enable secret 'pass'
-SW>en
-Password:cs
+SW1# show interfaces description  #Shows the description of all interfaces
+
+SW1# show interfaces status  #Shows the status of all interfaces like connected or not, speed, duplex, trunk or access vlan.
+
+SW1# show crypto key mypubkey rsa      # Shows the public encryption key used for SSH
+
+SW1# show dhcp lease  #Shows information about the leased IP address
+
+Router# show ip route  #Show the routing table dynamic/static
+_______________________________________________________________________________________________________________________
+< Router Mode >
+----------------------------
+
+Router>: User mode = Limited to basic monitoring commands
+
+Router#: Privileged mode (exec-level mode) = Provides access to all other router commands
+
+Router(config)#: global configuration mode = Commands that affect the entire system
+
+Router(config-if)#: interface mode = Commands that affect interfaces
+
+Router(config-subif)#: subinterface mode = Commands that affect subinterfaces
+
+Router(config-line)#: line mode = Commands that affect in lines modes (console, vty, aux…)
+
+Router(config-router)#: router configuration mode
+
+-------------------------------------------------------------------------------------------------------------------------
+< Changing switch hostname >
+-------------------------------------
+
+Switch(config)# hostname SW1 
+_______________________________________________________________________________________________________________________
+< Configuring passwords >
+---------------------------------------
+
+SW1(config)# enable secret test123        # MD5 hash
+SW1(config)# enable password test123    # Clear text
+------------------------------------------------------------------------------------------------------------------------
+< Securing console port >
+--------------------------------------
+
+SW1(config)# line con 0
+SW1(config-line)# password cisco
+SW1(config-line)# login
+________________________________________________________________________________________________________________________
+< Securing terminal lines >
+------------------------------------
+
+SW1(config)# line vty 0 4
+SW1(config-line)# password cisco
+SW1(config-line)# login
+_______________________________________________________________________________________________________________________
+< Encrypting passwords > 
+
+SW1(config)# service password-encryption
+________________________________________________________________________________________________________________________
+< Configuring banners >
+------------------------------------
+
+SW1(config)# banner motd $
+
+# EX OF BANNER
+
+§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
+§ UNAUTHORIZED ACCESS IS PROHIBITE §
+§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
+
+-----------------------------------------------------------------------------------------------------------------------
+< Configuring IP address on Switch >
+----------------------------------------------
+
+SW1(config)# interface vlan 1
+SW1(config-if)# ip address 172.16.1.11 255.255.255.0    ! or DHCP
+SW1(config-if)# no shutdown
+_________________________________________________________________________________________________________________________
+< Configuring default gateway >
+-------------------------------------
+
+SW1(config)# ip default-gateway 172.16.1.1
+
+_________________________________________________________________________________________________________________________
+<Saving configuration > 
+--------------------------------------
+
+SW1# copy running-config startup-config
+Destination filename [startup-config]?    ! Press enter to confirm file name.
+Building configuration…
+[OK]
+
+SW1# wr  #Short for write memory
+Building configuration…
+[OK].....
 __________________________________________________________________________________________________________________________
-
-<CONFIGUR PORT SECURITY>
+<CONFIGURING PORT SECURITY>
+---------------------------------------
 
 SW# config t
 SW(config-if)# int 'int'
@@ -45,7 +127,7 @@ SW(config-if)# switchport mode access
 SW> sh port-security or sh port-security int 'int'                  # show the number of discarded frames
 
 __________________________________________________________________________________________________________________________
-< ROUTING PROTOCOLS >
+< CONFIGURING ROUTING PROTOCOLS >
 -----------------------------------------
 
 <EIGRP> (CISCO PROPRIETARY)
@@ -81,8 +163,8 @@ R1(config-if)#ip hello-interval eigrp 'asn' 'second'  #select eigrp ans with sec
 R1(config-if)#interface 'int' #re-enable the interface
 R1(config-if)#no shutdown
 --------------------------------------------------------------------------------------------------------------------------
-
-EIGRP IPv6
+<EIGRP IPv6>
+---------------------
 
 R1# config t
 R1(config)#ipv6 unicast-routing  #to start useing ipv6 on ROUTER
@@ -96,8 +178,8 @@ R1(config-if)#int 'int'
 R1(config-if)#ipv6 eigrp 'ASN'  # same asn we select before
 
 --------------------------------------------------------------------------------------------------------------------------
- 
- OSPF
+<OSPFv2>
+----------------------
 
 <CONFIGURING OSPFv2 ipv4 Single Area 0> classless config
 R2#config t
@@ -124,9 +206,11 @@ R2(config)# ip route 0.0.0.0 0.0.0.0 'netx-hop ip adrr' OR 'int'
 R2(config)#router ospf 'process ID'
  ES       #router ospf 1
 R2(config-router)#default-information originate
-__________________________________________________________________________________________________________________________
 
+__________________________________________________________________________________________________________________________
 <CONFIGURING OSPFv2 Single Area 0 ipv4 WildcardMask 0.0.0.0> # classful config
+----------------------------------------------------------------------------------
+
 R2#config t
 R2(config)#router ospf 'process ID' from 1-65535
   ES      #router ospf 1
@@ -134,10 +218,12 @@ R2(config-router)#network 'Network id' 'WildcardMask' area 'area ID' from 0-4294
 ES 10.0.0.0/24   #network 10.0.0.0 0.0.0.0 area 0
 R2(config-router)#network 192.168.10.64 0.0.0.0 area 0
                  #network 192.168.10.80 0.0.0.0 area 0
+                 
 __________________________________________________________________________________________________________________________
-
 <CONFIGURING OSPFv2 ipv4 Multi-Area>
 in multi ospf area, musb be an Area 0 (backbone)
+---------------------------------------------------------
+
 R1#config t
 R1(config)#router ospf 'process ID' from 1-65535 * can be different in the same area
 R1(config-router)#router-id 1.1.1.1 # router priority
@@ -161,8 +247,8 @@ R3(config-router)#network 172.16.10.4 0.0.0.3 area 2
 R3(config-router)#network 10.10.0.0 0.0.255.255 area 2
 
 __________________________________________________________________________________________________________________________
-
 <OSPFv2 verification command>
+-----------------------------------------------
 
 R2# sh ip ospf neighbor  # to see ospf enable interfaces
                            adjacency state, DR/BDR
@@ -183,8 +269,8 @@ R2# sh ip route ospf             #sh ospf route
 R2# sh ip ospf database          #infos about number if routers in the internetwork (AS)
                                  #ROUTER-ID,
 __________________________________________________________________________________________________________________________
-
 < CONFIGURING OSPFv3 Single Area>
+-------------------------------------------------
 
 R1(config)#ipv6 unicast-routing                     #must be used to enable ipv on router
 R1(config)#ipv6 router ospf 'ospf process-id'
@@ -197,8 +283,8 @@ R1(config-if)#ipv6 ospf 10 area 1               #run ospf 'ospf process-id' on a
 
 
 __________________________________________________________________________________________________________________________
-
 < CONFIGURING OSPFv3 Multi-area >
+----------------------------------------
 
 R1(config)#ipv6 unicast-routing
 R1(config)#ipv6 router ospf 10
@@ -220,8 +306,8 @@ s0/0/0       #int s0/0/0
              #ipv6 ospf 1 area 0
 
 __________________________________________________________________________________________________________________________
-
 <OSPFv3 verification command>
+-----------------------------------------
 
 R2# sh ipv6 route ospf   # show routes on routers
                          # O is intra-area, OI is inter-Area
@@ -240,8 +326,8 @@ R2# sh ipv6 ospf neighbor  #RID adjacency state,
 R2# sh ipv6 ospf    #roouter role ospf process-id, bandwidth
 
 __________________________________________________________________________________________________________________________
-
 <Configuring AAA Radius> udp
+------------------------------------
 
 Router#config t
 Router(config)#aaa new-model                    #enable AAA services in order to configure all AAA commands
@@ -253,8 +339,8 @@ Router(config)#aaa group server radius MyRadiusGroup
 Router(config-sg-radius)#server name SecureLogin
 Router(config)#aaa authentication login default group MyRadiusGroup local
 __________________________________________________________________________________________________________________________
-
 <Configure AAA TACACS+>  tcp
+-------------------------------------------
 
 Router#config t
 Router(config)# aaa new-model   #enable AAA in global configuration
@@ -275,8 +361,9 @@ R1(config)#ip dhcp pool Floor1DHCP                            # pool name
 R1(dhcp-config)#network 192.168.0.0 255.255.255.0             # networkID & SubnetMask
 R1(dhcp-config)#default-router 192.168.0.1                    # GW
 R1(dhcp-config)#dns-server 192.168.0.1                        # dns server
-
+-------------------------------------------------------------------------------------------
 < display DHCPv4 infos >
+--------------------------------
 
 R1#show ip dhcp binding            # To view information about the currently leased addresses
 IP address Client-ID/ Lease expiration Type
@@ -291,8 +378,8 @@ R1#config t
 R1(config)#ip helper-address 'DHCP-server-ip'  # enable dhcp forwarding proccess
 
 __________________________________________________________________________________________________________________________
-
 <Confguring DHCP Snooping on Switch>
+-----------------------------------------------
 
 SW#config t
 SW(config)#ip dhcp snoopong                         #enable dhcp snooping on global configuration
@@ -305,25 +392,27 @@ SW(config-if)#ip dhcp snooping trust                #select the int as trust, by
 SW#show ip dhcp snooping    #show dhcp snooping status
 SW#show ip dhcp binding     #
 __________________________________________________________________________________________________________________________
-
 <Configuring DAI on Switch>
+---------------------------------------------
 
 SW#config t
 SW(config)#ip arp inspection vlan 'vlanID'  #enable DAI on vlan selected
 SW(config)#interface fa0/0                  #select the interface as trust
-SW(config-if)#ip arp inspection trus
+SW(config-if)#ip arp inspection trust
 
+----------------------
 <display DAI infos>
+----------------------
 
 SW#show ip arp inspection
 SW#show ip arp inspection statistics
 
 __________________________________________________________________________________________________________________________
-
 <CONFIGURING HSRP>
 --------------------------
 
-(Active router)
+#(Active router)
+
 HSRP1#config t
 HSRP1(config)#int 'interface'
 HSRP1(config-if)#standby 'group-number' ip 'virtual-ip'  # to set group-number-ID & virtual-ip
@@ -332,18 +421,20 @@ HSRP1(config-if)#standby 1 name 'name'      # optional
 HSRP1(config-if)#standby 1 priority 'id from 0-255'  # to set priority, highest priority mean Active-router, default is 100
    ES           #standby 1 priority 110
 
-(Stanby router)
+
+#(Stanby router)
+
 HSRP2#config t
 HSRP2(config)#int 'same interface on HARP1 router'
 HSRP2(config-ig)#standby 'same ID group on HSRP1 router' ip 'virtual ip, same on HSRP1 router'
  ES             #standby 1 ip 10.10.10.1
 HSRP2(config-if)# standby 1 name 'name'  #same name on -HSRP1 router
 
-
--- TO SEE INFO about HSRP
+--------------------------------
+ < TO SEE INFO about HSRP >
+--------------------------------
 
 HSRP1#show standby
-
 # to see group id, virtual ip & mac_address, hello TIMER
   whois the active router& standby routers
 
@@ -366,7 +457,6 @@ Priority 110 (configured 110
 HSRP2#debug standby
 
 ________________________________________________________________________________________________________________________
-
 <CONFIGURING SPAN ON SWITCH/ROUTER>
 ------------------------------------------
 
@@ -379,7 +469,6 @@ SW(config)#monitor session 'id' destination interface 'int'   #Associate same SP
 
 SW(config)#do sh monitor          # to see SPAN infos
 _______________________________________________________________________________________________________________________
-
 <IPV6 address Manual Assignment>
 ------------------------------------
 
@@ -399,30 +488,31 @@ R1(config-if)#ipv6 route 'ipv6prefix/ipv6prefix-lenght' 'ipv6-next-hop' 'metric'
 ES           #ipv6 route  2001:db8:34cd:14::/64 2001:db8:34cd:12:21a:2fff:fee7:4398 150
 R1(config-if)#show ip route          # to see all routes: static, dynamic, all
 R1(config-if)#show ipv6 route static # to see only static routes
+
 __________________________________________________________________________________________________________________________
-
 <WAN ENCAPSULATION>
--------------------------------
-
-<HDLC>  
-# only on serial link this ENCAPSULATION protocol works
-
+--------------------------------------------------------------------------------------------------------------------
+________________________________________________________________
+<HDLC> (only on serial link this ENCAPSULATION protocol works)
+----------------------------------------------------------------
 R1#config t
 R1(config)#int s0/0/0
 R1(config-if)#ip address 'ip-router .1' 'SubnetMask'
 R1(config-if)#no shutdown  # by defautl interfaces on Router are disabled
 R1#show int s0/0/0  # to see info about the encapsulation enbled
 
-
+-----------------------------------
 < PPP Point-to-Point Protocol >
+-----------------------------------
 
 R1#config t
 R1(config)#int s0/0/0              # select an interface to enable PPP 
 R1(config-if)#encapsulation ppp    # select the encapsulation protocol
 R1(config-if)#sh int s0/0/0        # to see info abouthe interface s0/0/0
 
-
+-----------------------------------------------------
 <PPP Authentication, PAP or CHAP> (optional step)
+-----------------------------------------------------
 
 # when you have configured PPP on an interface between two Routers, then, you can configure Authentication PAP or CHAP between two routers.But first you must set a hostname to each router; with 'hostname command', after that you set Username and Password for the remote router(Server), that will be connecting to your router
 
